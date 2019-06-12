@@ -1,42 +1,39 @@
-// Prompt user to login using OAuth2
-// Show list of Items owned by logged in user
-// on click of item in list, show imput textbox to type tag in
-// on clicking button at end of tag textbox, add tag to selected item
-// report success or failure of adding tag
-// app ID: 2ri89nIJnXGkjf46
+// Brings user to OAuth login page -- DONE
+// Show list of Items owned by logged in user, with checkboxes -- DONE
+// on click of item in list, check box -- DONE
+// on clicking button at end of tag textbox, add tags to all checked items --
+// report success or failure of adding tags --
+// app ID: pkA0skZI1sPjdepJ
 
 
 require([
-  "esri/arcgis/Portal", "esri/arcgis/OAuthInfo", "esri/IdentityManager",
-  "dojo/dom-style", "dojo/dom-attr", "dojo/dom", "dojo/on", "dojo/_base/array",
+  "esri/arcgis/Portal",
+  "esri/arcgis/OAuthInfo",
+  "esri/IdentityManager",
+  "esri/request",
+  "dojo/dom-style",
+  "dojo/dom-attr",
+  "dojo/dom",
+  "dojo/on",
+  "dojo/_base/array",
   "dojo/domReady!"
-], function (arcgisPortal, OAuthInfo, esriId,
-  domStyle, domAttr, dom, on, arrayUtils){
+], function (arcgisPortal, OAuthInfo, IDManager, request, domStyle, domAttr, dom, on, arrayUtils){
   var info = new OAuthInfo({
-    appId: "2ri89nIJnXGkjf46",
+    appId: "pkA0skZI1sPjdepJ",
     popup: false
   });
-  esriId.registerOAuthInfos([info]);
+  IDManager.registerOAuthInfos([info]);
 
-  esriId.checkSignInStatus(info.portalUrl + "/sharing").then(
+  IDManager.checkSignInStatus(info.portalUrl + "/sharing").then(
     function (){
       displayItems();
     }
   ).otherwise(
-    function (){
-      // Anonymous view
-      domStyle.set("loggedOut", "display", "block");
-      domStyle.set("loggedIn", "display", "none");
-    }
+    IDManager.getCredential(info.portalUrl + "/sharing")
   );
 
-  on(dom.byId("sign-in"), "click", function (){
-    // user will be redirected to OAuth Sign In page
-    esriId.getCredential(info.portalUrl + "/sharing");
-  });
-
   on(dom.byId("sign-out"), "click", function (){
-    esriId.destroyCredentials();
+    IDManager.destroyCredentials();
     window.location.reload();
   });
 
@@ -44,7 +41,6 @@ require([
     new arcgisPortal.Portal(info.portalUrl).signIn().then(
       function (portalUser) {
         domAttr.set("userId", "innerHTML", portalUser.fullName);
-        domStyle.set("loggedOut", "display", "none");
         domStyle.set("loggedIn", "display", "block");
         queryPortal(portalUser);
       }
@@ -57,15 +53,12 @@ require([
 
   function queryPortal(portalUser){
     var portal = portalUser.portal;
-    //See list of valid item types here:  http://www.arcgis.com/apidocs/rest/index.html?itemtypes.html
-    //See search reference here:  http://www.arcgis.com/apidocs/rest/index.html?searchreference.html
     var queryParams = {
       q: "owner:" + portalUser.username,
-      sortField: "numViews",
-      sortOrder: "desc",
+      sortField: "title",
+      sortOrder: "asc",
       num: 20
     };
-    console.log(portal.queryItems(queryParams))
     portal.queryItems(queryParams).then(createGallery);
   }
 
@@ -74,21 +67,16 @@ require([
 
     arrayUtils.forEach(items.results, function (item){
       htmlFragment += (
-      "<div class=\"esri-item-container\">" +
-      (
-        item.thumbnailUrl ?
-        "<div class=\"esri-image\" style=\"background-image:url(" + item.thumbnailUrl + ");\"></div>" :
-          "<div class=\"esri-image esri-null-image\">Thumbnail not available</div>"
-      ) +
+      "<input type=\"checkbox\" name=\"listItem\">" +
       (
         item.title ?
-        "<div class=\"esri-title\">" + (item.title || "") + "</div>" :
-          "<div class=\"esri-title esri-null-title\">Title not available</div>"
+          (item.title || "") :
+          "Title not available"
       ) +
-      "</div>"
+      "</input> </br>"
       );
     });
 
-    dom.byId("itemGallery").innerHTML = htmlFragment;
+    dom.byId("itemList").innerHTML = htmlFragment;
   }
 });
