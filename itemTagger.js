@@ -59,13 +59,14 @@ require([
       sortOrder: "asc",
       num: 20
     };
-    portal.queryItems(queryParams).then(createGallery);
+    portal.queryItems(queryParams).then(createList);
   }
 
-  function createGallery(items){
+  function createList(items){
     var htmlFragment = "";
-
+		console.log(items.results)
     arrayUtils.forEach(items.results, function (item){
+		console.log(item.tags, ":", item.itemUrl);
       htmlFragment += (
       "<input type=\"checkbox\" name=\"listItem\">" +
       (
@@ -79,4 +80,27 @@ require([
 
     dom.byId("itemList").innerHTML = htmlFragment;
   }
+	
+	// Info needed to update tags - owner, itemID, token, current tags, tags to add. check tags to add against current tags and remove duplicates.
+	var itemID = "8f0b982017be4890a824e90e2b8a0924";
+	var owner = "b_Jones";
+	var token = "UxVLEVmcCS_OlJPLjnI2yID7eKIwTM60XzbZHEK2MPMdncW_TDIcPYsiERdWZDtpur9LcD3pYPSGp2ClcPqXe62xP5mOsu5Uju4P4PFoWR6YHvn4El9xLmL8LesMD960MF7It0lLWxS4YEwrzTDNfqm1X23fc6r5o5kFHshuVr9B5W-Mp47IFNSgsmKz76-k21YFWfVE2M46C04u7ciARANDR8nCMF_ofisl39YIKtE.";
+	var currentTags = ["OAuth","Test","Test2","Test3"];
+	var tagsToAdd = ["OAuth","Test","Test4"];
+	for (let i = 0; i < tagsToAdd.length; i++) {
+			if (currentTags.indexOf(tagsToAdd[i]) === -1) {
+				currentTags.push(tagsToAdd[i]);
+			}
+		};
+	var tagUpdate = request({
+		url: `https://arcgis.com/sharing/rest/content/users/${owner}/items/${itemID}/update`,
+		content: {
+			tags: currentTags.join(","),
+			clearEmptyFields: true,
+			id: itemID,
+			f: "json",
+			token: token
+		}},
+		{usePost: true,	
+	});
 });
