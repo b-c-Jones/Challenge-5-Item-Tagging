@@ -1,7 +1,7 @@
 // Brings user to OAuth login page -- DONE
 // Show list of Items owned by logged in user, with checkboxes -- DONE
 // on click of item in list, check box -- DONE
-// on clicking button at end of tag textbox, add tags to all checked items --
+// on clicking button at end of tag textbox, add tags to all checked items -- DONE
 // report success or failure of adding tags --
 // app ID: pkA0skZI1sPjdepJ
 
@@ -154,6 +154,14 @@ require([
           }},
           {usePost: true,	
         });
+        tagUpdate.then(
+          function(response) {
+            console.log("success");
+          },
+          function(error) {
+            console.log("failure");
+          }
+        )
         var testDiv = domConstruct.create("div", {innerHTML: `${response.title}, Tags: ${response.tags}`}, tempDiv)
       }, function(error) {
         console.log("Error: ", error.message);
