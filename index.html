@@ -2,25 +2,36 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>title</title>
-    <script src="https://js.arcgis.com/3.28compact/"></script>
-    <script src="./itemTagger.js"></script>
+    <title>Item Tag Updater</title>
+    <link rel="stylesheet" href="https://s3-us-west-1.amazonaws.com/patterns.esri.com/files/calcite-web/1.2.5/css/calcite-web.min.css">
+    <link rel="stylesheet" href="./stylesheet.css">
+    <script defer src="https://js.arcgis.com/3.28compact/"></script>
+    <script defer src="./itemTagger.js"></script>
   </head>
   <body>
-    <div id="loggedIn" style="display: none">
-        Welcome <span id="userId" style="font-weight: bold;"></span>
-         - 
-        <span id="sign-out">Sign Out</span>
-      </div>
-    
-      <div id="itemListDiv">
-        <ul id="itemList"></ul>
-        <textarea id="textTest"></textarea>
-        <button type="button" id="userList">Add Tags</button>
-      </div>
+    <div class="header top-nav fade-in" id="headerDiv">
+      <h1 class="top-nav-title" id="headerTitle">
+        ArcGIS Item Tagger
+      </h1>
+      <div class="dropdown js-dropdown right" id="userDiv">
+          <a class="top-nav-link icon-ui-user margin-left-1 js-dropdown-toggle" id="userId"  tabindex="0" aria-haspopup="true" aria-expanded="false" href="#">User</a>
+          <nav class="dropdown-menu dropdown-right" role="menu">
+            <span class="dropdown-title">
+              <span id="userFullName">User Name</span>
+              <br>
+              <small id="userName">username</small>
+            </span>
+            <a href="#" class="dropdown-link" id="sign-out" role="menu-item">Sign Out</a>
+          </nav>
+        </div>
+    </div>
 
-      <div id="tempDiv">
-
-      </div>
+    <div id="itemListDiv" class="leader-quarter block-group block-group-4-up tablet-block-group-2-up phone-block-group-1-up"></div>
+    <div id="addTagsDiv" class="input-group column-18 center-column">
+      <input class="input-group-input" type="text" id="tagInputBox" placeholder="Example: new tag 1, new tag 2, new tag 3"></input>
+      <span class="input-group-button">
+        <button type="button" class="btn btn-small" id="addTagsBtn">Add Tags</button>
+      </span>
+    </div>
   </body>
 </html>
