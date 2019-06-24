@@ -1,0 +1,32 @@
+body {
+  background-color: #f8f8f8;
+}
+input[type="checkbox"][id^="listItem"] {
+  display: none;
+}
+label {
+  background-color: white;
+  box-shadow: 1px 2px rgb(150, 150, 150);
+}
+input:checked + label {
+  box-shadow: 0 0 10px 3px #56a5d8;
+}
+label img {
+  width: 100%;
+}
+.header {
+  max-height: 10vh;
+}
+.block {
+  max-width: 250px;
+}
+#itemListDiv {
+  width: 100%;
+  padding-top: 10px;
+  max-height: 80vh;
+  overflow: auto;
+  justify-content: center;
+}
+#addTagsBtn {
+  width: 100px;
+}
