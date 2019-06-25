@@ -30,6 +30,8 @@ require([
   var currentTags = [];
 	var tagsToAdd = [];
   var listNum = 0;
+	var tagUpdateSuccesses = 0;
+	var tagUpdateFailures = 0;
   
   // allows the user to log in with oauth 2.0
   var oAuthInfo = new OAuthInfo({
@@ -110,6 +112,11 @@ require([
 	// Info needed to update tags - owner, itemID, current tags, tags to add. check tags to add against current tags and remove duplicates.
   // on clicking the addTagsBtn button, empty the results list, then check if there are tags to add and boxes checked. if so, add those tags to the items with checked boxes
   on(dom.byId("addTagsBtn"), "click", function (){
+		var itemIdArr = [];
+    var items = query(".listItem");
+		tagUpdateSuccesses = 0;
+		tagUpdateFailures = 0;
+		
     if (!dom.byId("tagInputBox").value) {
       if (!dom.byId("tagUpdateModal")) {
         _calciteAlert("Updating Tags", 8);
@@ -119,8 +126,6 @@ require([
       };
       return
     }
-    var itemIdArr = [];
-    var items = query(".listItem");
     for (let i = 1; i <= items.length; i++) {
       if (dom.byId(`listItem${i}`).checked === true) {
         itemIdArr.push(dom.byId(`listItem${i}`).value);
@@ -169,30 +174,35 @@ require([
         });
         tagUpdate.then(
           lang.hitch(currentObj, function() {
+						tagUpdateSuccesses++;
             if (!dom.byId("tagUpdateModal")) {
               _calciteAlert("Updating Tags", 8);
-              domConstruct.create("div", { class: "font-size--2", innerHTML: `Added tags to ${currentObj.title} Succesfully.`, style: "color: #5a9359;" }, alertText);
+              domConstruct.create("span", { class: "dropdown-title font-size--2", id: "", innerHTML: `Added tags to ${currentObj.title} Succesfully.`, style: "color: #5a9359;" }, itemsUpdatedDropdown);
             } else {
-              domConstruct.create("div", { class: "font-size--2", innerHTML: `Added tags to ${currentObj.title} Succesfully.`, style: "color: #5a9359;" }, alertText);
+							dom.byId("itemsUpdatedButton").innerHTML = `${tagUpdateSuccesses} Items updated successfully.`;
+              domConstruct.create("span", { class: "dropdown-title font-size--2", innerHTML: `Added tags to ${currentObj.title} Succesfully.`, style: "color: #5a9359;" }, itemsUpdatedDropdown);
             };
           },
           function() {
-            console.log("failure");
+						tagUpdateFailures++;
             if (!dom.byId("tagUpdateModal")) {
               _calciteAlert("Updating Tags", 8);
-              domConstruct.create("div", { class: "font-size--2", innerHTML: `Failed to add tags to ${currentObj.title}.`, style: "color: #de2900;" }, alertText);
+              domConstruct.create("span", { class: "dropdown-title font-size--2", innerHTML: `Failed to add tags to ${currentObj.title}.`, style: "color: #de2900;" }, itemsFailedDropdown);
             } else {
-              domConstruct.create("div", { class: "font-size--2", innerHTML: `Failed to add tags to ${currentObj.title}.`, style: "color: #de2900;" }, alertText);
+							dom.byId("itemsFailedButton").innerHTML = `${tagUpdateFailures} Items failed to update.`;
+              domConstruct.create("span", { class: "dropdown-title font-size--2", innerHTML: `Failed to add tags to ${currentObj.title}.`, style: "color: #de2900;" }, itemsFailedDropdown);
             };
           })
         )
       }, 
       function(error) {
+				tagUpdateFailures++;
         if (!dom.byId("tagUpdateModal")) {
           _calciteAlert("Updating Tags", 8);
-          domConstruct.create("div", { class: "font-size--2", innerHTML: `Failed to get tags from ${error.title}.`, style: "color: #de2900;" }, alertText);
+          domConstruct.create("span", { class: "dropdown-title font-size--2", innerHTML: `Failed to get tags from ${error.title}.`, style: "color: #de2900;" }, itemsFailedDropdown);
         } else {
-          domConstruct.create("div", { class: "font-size--2", innerHTML: `Failed to get tags from ${error.title}.`, style: "color: #de2900;" }, alertText);
+					dom.byId("itemsFailedButton").innerHTML = `${tagUpdateFailures} Items failed to update.`;
+          domConstruct.create("span", { class: "dropdown-title font-size--2", innerHTML: `Failed to get tags from ${error.title}.`, style: "color: #de2900;" }, itemsFailedDropdown);
         };
       });
     }
@@ -203,6 +213,12 @@ require([
     var alertOverlay = domConstruct.create("div", { class: "modal-overlay is-active", id: "tagUpdateModal" }, document.body);
     var alertContent = domConstruct.create("div", { class: "modal-content column-"+columns, id: "alertContent", "role":"dialog", "aria-labelledby":"modal" }, alertOverlay);
     domConstruct.create("h5", { class: "trailer-half text-blue", innerHTML: title }, alertContent);
+		var itemsUpdatedDiv = domConstruct.create("div", { class: "dropdown js-dropdown", id: "itemsUpdatedDiv" }, alertContent);
+		domConstruct.create("button", { class: "btn btn-green btn-fill dropdown-btn js-dropdown-toggle", tabindex: "0", "aria-haspopup": "true", "aria-expanded": "false", id:"itemsUpdatedButton", innerHTML: `${tagUpdateSuccesses} Items updated successfully.` }, itemsUpdatedDiv);
+		domConstruct.create("nav", { class: "dropdown-menu modifier-class", role: "menu", id: "itemsUpdatedDropdown" }, itemsUpdatedDiv);
+		var itemsFailedDiv = domConstruct.create("div", { class: "dropdown js-dropdown", id: "itemsFailedDiv" }, alertContent);
+		domConstruct.create("button", { class: "btn btn-red btn-fill dropdown-btn js-dropdown-toggle", tabindex: "0", "aria-haspopup": "true", "aria-expanded": "false", id: "itemsFailedButton", innerHTML: `${tagUpdateFailures} Items failed to update.` }, itemsFailedDiv);
+		domConstruct.create("nav", { class: "dropdown-menu modifier-class", role: "menu", id: "itemsFailedDropdown" }, itemsFailedDiv);
     var alertText = domConstruct.create("div", { id: "alertText", style: "max-height: 60vh; overflow:auto" }, alertContent)
     var alertButtons = domConstruct.create("div", { class: "text-right" }, alertContent);
     var okBtn = domConstruct.create("button", { class: "btn btn-small", innerHTML: "OK" }, alertButtons);
